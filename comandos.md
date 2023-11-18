@@ -1,1 +1,1 @@
-Correr la app: uvicorn main:app --reload
+Activar el entorno (windows): tribu6-env/Scripts/Activate.ps1
