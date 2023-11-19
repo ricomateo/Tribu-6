@@ -1,18 +1,15 @@
 import os
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlmodel import SQLModel, create_engine
 
 sqlite_file_name = "../area_proyectos.sqlite"
 base_dir = os.path.dirname(os.path.realpath(__file__))
 
 DATABASE_URL = f"sqlite:///{os.path.join(base_dir,sqlite_file_name)}"
 
-engine = create_engine(
-    DATABASE_URL, echo=False
-)  # connect_args={"check_same_thread": False}
+connect_args = {"check_same_thread": False}
+engine = create_engine(DATABASE_URL, echo=False, connect_args=connect_args)
 
-Session = sessionmaker(bind=engine)  # autoflush=False
 
-Base = declarative_base()
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)

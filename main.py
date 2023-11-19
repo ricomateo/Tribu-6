@@ -1,20 +1,20 @@
 from fastapi import FastAPI
 import uvicorn
-from config.database import engine, Base
+from config.database import create_db_and_tables
 
 from routers import proyectos
 
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
+create_db_and_tables()
 
 app.include_router(proyectos.router)
 
 
 @app.get("/")
 async def root():
-    return {"message": "API de proyectos online"}
+    return {"message": "API de proyectos está en linea"}
 
 
 if __name__ == "__main__":

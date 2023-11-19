@@ -1,9 +1,8 @@
-from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, status, HTTPException
 from typing import List
+from sqlmodel import Session, select
 from models.proyectos import Proyectos, ProyectosUpdate, ProyectosRead, ProyectosCreate
-from config.database import Session
+from config.database import engine
 
 router = APIRouter(
     prefix="/proyectos",
@@ -16,12 +15,9 @@ router = APIRouter(
     "/get_proyectos", status_code=status.HTTP_200_OK, response_model=List[ProyectosRead]
 )
 def get_proyectos():
-    db = Session()
-    result = db.query(Proyectos).all()
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content=jsonable_encoder(result)
-    )
+    with Session(engine) as session:
+        heroes = session.exec(select(Proyectos)).all()
+        return heroes
 
 
 @router.get(
@@ -30,79 +26,52 @@ def get_proyectos():
     response_model=Proyectos,
 )
 def get_proyecto_por_id(id: int):
-    db = Session()
-    result = db.query(Proyectos).filter(Proyectos.id == id).first()
+    with Session(engine) as session:
+        proyecto = session.get(Proyectos, id)
+        if not proyecto:
+            raise HTTPException(status_code=404, detail="No se encontro proyecto")
 
-    if not result:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "No existe un proyecto con ese id"},
-        )
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content=jsonable_encoder(result)
-    )
+        return proyecto
 
 
 @router.post(
     "/create_proyecto",
     status_code=status.HTTP_201_CREATED,
-    response_model=Proyectos,
+    response_model=ProyectosRead,
 )
-def create_proyecto(proyecto: Proyectos):
-    db = Session()
-
-    new_proyecto = Proyectos(**proyecto.dict())
-
-    db.add(new_proyecto)
-    db.commit()
-    return proyecto
+def create_proyecto(proyecto: ProyectosCreate):
+    with Session(engine) as session:
+        db_proyectos = Proyectos.from_orm(proyecto)
+        session.add(db_proyectos)
+        session.commit()
+        session.refresh(db_proyectos)
+        return db_proyectos
 
 
 @router.delete(
-    "/delete_proyecto/{id}",
-    status_code=status.HTTP_200_OK,
+    "/delete_proyecto/{id}", status_code=status.HTTP_200_OK, response_model=Proyectos
 )
 def delete_proyecto(id: int):
-    db = Session()
-    result = db.query(Proyectos).filter(Proyectos.id == id).first()
-
-    if not result:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "No existe un proyecto con ese id"},
-        )
-
-    db.delete(result)
-    db.commit()
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content=jsonable_encoder(result)
-    )
+    with Session(engine) as session:
+        proyecto = session.get(Proyectos, id)
+        if not proyecto:
+            raise HTTPException(status_code=404, detail="No se encontro proyecto")
+        session.delete(proyecto)
+        session.commit()
+        return proyecto
 
 
-@router.patch(
-    "/patch_proyecto",
-    status_code=status.HTTP_200_OK,
-)
-def update_proyecto(proyecto_id: int, proyecto: ProyectosUpdate):
-    db = Session()
-    result = db.get(Proyectos, proyecto_id)
+@router.patch("/patch_proyecto/{id}", response_model=ProyectosRead)
+def update_proyecto(id: int, proyecto: ProyectosUpdate):
+    with Session(engine) as session:
+        db_proyectos = session.get(Proyectos, id)
+        if not db_proyectos:
+            raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
-    if not result:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "No existe un proyecto con ese id"},
-        )
-
-    proyecto_data = proyecto.dict(exclude_unset=True)
-    for key, value in proyecto_data.items():
-        setattr(result, key, value)
-
-    db.add(result)
-    db.commit()
-    db.refresh(result)
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content=jsonable_encoder(result)
-    )
+        proyecto_data = proyecto.dict(exclude_unset=True)
+        for key, value in proyecto_data.items():
+            setattr(db_proyectos, key, value)
+        session.add(db_proyectos)
+        session.commit()
+        session.refresh(db_proyectos)
+        return db_proyectos

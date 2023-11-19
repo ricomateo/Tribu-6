@@ -1,5 +1,3 @@
-from config.database import Base
-from sqlalchemy import Column, Integer, String, Date
 from typing import Optional
 from datetime import date
 
