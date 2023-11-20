@@ -16,8 +16,8 @@ router = APIRouter(
 )
 def get_proyectos():
     with Session(engine) as session:
-        heroes = session.exec(select(Proyectos)).all()
-        return heroes
+        proyectos = session.exec(select(Proyectos)).all()
+        return proyectos
 
 
 @router.get(
