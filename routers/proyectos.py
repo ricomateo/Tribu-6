@@ -4,14 +4,14 @@ from sqlmodel import Session, select
 from models.proyectos import Proyectos, ProyectosUpdate, ProyectosRead, ProyectosCreate
 from config.database import engine
 
-router = APIRouter(
+routerProyectos = APIRouter(
     prefix="/proyectos",
     tags=["Proyectos"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.get(
+@routerProyectos.get(
     "/get_proyectos", status_code=status.HTTP_200_OK, response_model=List[ProyectosRead]
 )
 def get_proyectos():
@@ -20,7 +20,7 @@ def get_proyectos():
         return proyectos
 
 
-@router.get(
+@routerProyectos.get(
     "/get_proyecto/{id}",
     status_code=status.HTTP_200_OK,
     response_model=Proyectos,
@@ -34,7 +34,7 @@ def get_proyecto_por_id(id: int):
         return proyecto
 
 
-@router.post(
+@routerProyectos.post(
     "/create_proyecto",
     status_code=status.HTTP_201_CREATED,
     response_model=ProyectosRead,
@@ -48,7 +48,7 @@ def create_proyecto(proyecto: ProyectosCreate):
         return db_proyectos
 
 
-@router.delete(
+@routerProyectos.delete(
     "/delete_proyecto/{id}", status_code=status.HTTP_200_OK, response_model=Proyectos
 )
 def delete_proyecto(id: int):
@@ -61,7 +61,7 @@ def delete_proyecto(id: int):
         return proyecto
 
 
-@router.patch("/patch_proyecto/{id}", response_model=ProyectosRead)
+@routerProyectos.patch("/patch_proyecto/{id}", response_model=ProyectosRead)
 def update_proyecto(id: int, proyecto: ProyectosUpdate):
     with Session(engine) as session:
         db_proyectos = session.get(Proyectos, id)
