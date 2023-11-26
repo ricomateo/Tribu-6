@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
+from models.proyectos import Proyectos
 from models.tareas import Tareas, TareasUpdate, TareasRead, TareasCreate
 from config.database import engine
 
@@ -41,6 +42,10 @@ def get_tarea_por_id(id: int):
 )
 def create_tarea(tarea: TareasCreate):
     with Session(engine) as session:
+        # Validacion fk
+        if tarea.id_proyecto != None and not session.get(Proyectos, tarea.id_proyecto):
+            raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
+
         db_tareas = Tareas.from_orm(tarea)
         session.add(db_tareas)
         session.commit()
@@ -67,6 +72,10 @@ def update_tarea(id: int, tarea: TareasUpdate):
         db_tareas = session.get(Tareas, id)
         if not db_tareas:
             raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+        # Validacion fk
+        if tarea.id_proyecto != None and not session.get(Proyectos, tarea.id_proyecto):
+            raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
         tarea_data = tarea.dict(exclude_unset=True)
         for key, value in tarea_data.items():

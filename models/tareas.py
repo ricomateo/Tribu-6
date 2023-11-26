@@ -5,11 +5,15 @@ from sqlmodel import Field, SQLModel
 
 
 class TareasBase(SQLModel):
-    nombre: str
+    nombre: str  # definir si es unico o no
     descripcion: str
-    fecha_inicio: date
+    fecha_inicio: date  # creacion o de inicio del trabajo? TODO definir
     fecha_fin: Optional[date] = None
     estados: str  # Posibles estados: Iniciada, no iniciada, finalizada
+    id_proyecto: Optional[int] = Field(default=None, foreign_key="proyectos.id")
+    # Responsable
+    # Prioridad
+    # Horas estimadas
 
 
 class Tareas(TareasBase, table=True):
@@ -30,3 +34,4 @@ class TareasUpdate(SQLModel):
     fecha_inicio: Optional[date] = None
     fecha_fin: Optional[date] = None
     estados: Optional[str] = None
+    id_proyecto: Optional[int] = None
