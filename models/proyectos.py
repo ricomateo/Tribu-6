@@ -1,3 +1,4 @@
+import string
 from typing import Optional
 from datetime import date
 
@@ -5,11 +6,12 @@ from sqlmodel import Field, SQLModel
 
 
 class ProyectosBase(SQLModel):
-    nombre: str
-    descripcion: str
+    name: str
+    description: str
     fecha_inicio: date
     fecha_estimada_fin: date
     fecha_fin: Optional[date] = None
+    state: str
 
 
 class Proyectos(ProyectosBase, table=True):
@@ -25,8 +27,9 @@ class ProyectosRead(ProyectosBase):
 
 
 class ProyectosUpdate(SQLModel):
-    nombre: Optional[str] = None
-    descripcion: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
     fecha_inicio: Optional[date] = None
     fecha_estimada_fin: Optional[date] = None
     fecha_fin: Optional[date] = None
+    state: Optional[str] = None

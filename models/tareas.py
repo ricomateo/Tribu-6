@@ -6,7 +6,7 @@ from sqlmodel import Field, SQLModel
 
 class TareasBase(SQLModel):
     nombre: str  # definir si es unico o no
-    descripcion: str
+    description: str
     fecha_inicio: date  # creacion o de inicio del trabajo? TODO definir
     fecha_fin: Optional[date] = None
     estados: str  # Posibles estados: Iniciada, no iniciada, finalizada
@@ -30,7 +30,7 @@ class TareasRead(TareasBase):
 
 class TareasUpdate(SQLModel):
     nombre: Optional[str] = None
-    descripcion: Optional[str] = None
+    description: Optional[str] = None
     fecha_inicio: Optional[date] = None
     fecha_fin: Optional[date] = None
     estados: Optional[str] = None
