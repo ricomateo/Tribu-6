@@ -1,4 +1,4 @@
 fastapi==0.104.1 
-sqlmodels==0.0.12
+sqlmodel==0.0.12
 uvicorn==0.22.0
 pydantic~=2.5.1
