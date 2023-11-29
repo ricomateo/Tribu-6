@@ -40,9 +40,9 @@ def get_task_by_id(id: int):
     status_code=status.HTTP_200_OK,
     response_model=List[TasksRead],
 )
-def get_tasks_by_project_id(proyect_id: int):
+def get_tasks_by_project_id(project_id: int):
     with Session(engine) as session:
-        tasks = session.exec(select(Tasks).where(Tasks.id_project == proyect_id)).all()
+        tasks = session.exec(select(Tasks).where(Tasks.project_id == project_id)).all()
         # if not tasks:
         #     raise HTTPException(status_code=404, detail="No se encontraron tareas")
 
@@ -57,7 +57,7 @@ def get_tasks_by_project_id(proyect_id: int):
 def create_task(task: TasksCreate):
     with Session(engine) as session:
         # Validacion fk
-        if task.id_project != None and not session.get(Projects, task.id_project):
+        if task.project_id != None and not session.get(Projects, task.project_id):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
         db_tasks = Tasks.from_orm(task)
@@ -88,7 +88,7 @@ def update_task(id: int, task: TasksUpdate):
             raise HTTPException(status_code=404, detail="Tarea no encontrada")
 
         # Validacion fk
-        if task.id_project != None and not session.get(Projects, task.id_project):
+        if task.project_id != None and not session.get(Projects, task.project_id):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
         task_data = task.dict(exclude_unset=True)
