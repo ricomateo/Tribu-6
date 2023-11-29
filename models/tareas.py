@@ -4,34 +4,30 @@ from datetime import date
 from sqlmodel import Field, SQLModel
 
 
-class TareasBase(SQLModel):
-    nombre: str  # definir si es unico o no
+class TasksBase(SQLModel):
+    name: str
+    state: str  # Posibles estados: Iniciada, no iniciada, finalizada
     description: str
-    fecha_inicio: date  # creacion o de inicio del trabajo? TODO definir
-    fecha_fin: Optional[date] = None
-    estados: str  # Posibles estados: Iniciada, no iniciada, finalizada
-    id_proyecto: Optional[int] = Field(default=None, foreign_key="proyectos.id")
+    creation_date: date = date.today()
+    id_project: Optional[int] = Field(default=None, foreign_key="projects.id")
     # Responsable
-    # Prioridad
-    # Horas estimadas
 
 
-class Tareas(TareasBase, table=True):
+class Tasks(TasksBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
 
-class TareasCreate(TareasBase):
+class TasksCreate(TasksBase):
     pass
 
 
-class TareasRead(TareasBase):
+class TasksRead(TasksBase):
     id: int
 
 
-class TareasUpdate(SQLModel):
-    nombre: Optional[str] = None
+class TasksUpdate(SQLModel):
+    name: Optional[str] = None
+    state: Optional[str] = None
     description: Optional[str] = None
-    fecha_inicio: Optional[date] = None
-    fecha_fin: Optional[date] = None
-    estados: Optional[str] = None
-    id_proyecto: Optional[int] = None
+    creation_date: Optional[date] = None
+    id_project: Optional[int] = None

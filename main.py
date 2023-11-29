@@ -2,8 +2,8 @@ from fastapi import FastAPI
 import uvicorn
 from config.database import create_db_and_tables
 
-from routers.proyectos import routerProyectos
-from routers.tareas import routerTareas
+from routers.proyectos import routerProjects
+from routers.tareas import routerTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -11,13 +11,14 @@ app = FastAPI()
 
 create_db_and_tables()
 
-app.include_router(routerProyectos)
-app.include_router(routerTareas)
+app.include_router(routerProjects)
+app.include_router(routerTasks)
 
 
 @app.get("/")
 async def root():
-    return {"message": "API de proyectos está en linea"}
+    return {"message": "API del area de proyectos está en linea"}
+
 
 # CORS
 app.add_middleware(

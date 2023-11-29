@@ -4,31 +4,27 @@ from datetime import date
 from sqlmodel import Field, SQLModel
 
 
-class ProyectosBase(SQLModel):
+class ProjectsBase(SQLModel):
     name: str
-    description: str
-    fecha_inicio: date
-    fecha_estimada_fin: date
-    fecha_fin: Optional[date] = None
     state: str
+    description: str
+    creation_date: date = date.today()
+    id_proyect_leader: Optional[int]
 
 
-class Proyectos(ProyectosBase, table=True):
+class Projects(ProjectsBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
 
-class ProyectosCreate(ProyectosBase):
+class ProjectsCreate(ProjectsBase):
     pass
 
 
-class ProyectosRead(ProyectosBase):
+class ProjectsRead(ProjectsBase):
     id: int
 
 
-class ProyectosUpdate(SQLModel):
+class ProjectsUpdate(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    fecha_inicio: Optional[date] = None
-    fecha_estimada_fin: Optional[date] = None
-    fecha_fin: Optional[date] = None
     state: Optional[str] = None

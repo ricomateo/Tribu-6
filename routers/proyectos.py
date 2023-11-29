@@ -1,77 +1,77 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
-from models.proyectos import Proyectos, ProyectosUpdate, ProyectosRead, ProyectosCreate
+from models.proyectos import Projects, ProjectsUpdate, ProjectsRead, ProjectsCreate
 from config.database import engine
 
-routerProyectos = APIRouter(
-    prefix="/proyectos",
-    tags=["Proyectos"],
+routerProjects = APIRouter(
+    prefix="/projects",
+    tags=["Projects"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@routerProyectos.get(
-    "/get_proyectos", status_code=status.HTTP_200_OK, response_model=List[ProyectosRead]
+@routerProjects.get(
+    "/get_projects", status_code=status.HTTP_200_OK, response_model=List[ProjectsRead]
 )
-def get_proyectos():
+def get_projects():
     with Session(engine) as session:
-        proyectos = session.exec(select(Proyectos)).all()
-        return proyectos
+        projects = session.exec(select(Projects)).all()
+        return projects
 
 
-@routerProyectos.get(
-    "/get_proyecto/{id}",
+@routerProjects.get(
+    "/get_project/{id}",
     status_code=status.HTTP_200_OK,
-    response_model=Proyectos,
+    response_model=Projects,
 )
-def get_proyecto_por_id(id: int):
+def get_project_by_id(id: int):
     with Session(engine) as session:
-        proyecto = session.get(Proyectos, id)
-        if not proyecto:
+        project = session.get(Projects, id)
+        if not project:
             raise HTTPException(status_code=404, detail="No se encontro proyecto")
 
-        return proyecto
+        return project
 
 
-@routerProyectos.post(
-    "/create_proyecto",
+@routerProjects.post(
+    "/create_project",
     status_code=status.HTTP_201_CREATED,
-    response_model=ProyectosRead,
+    response_model=ProjectsRead,
 )
-def create_proyecto(proyecto: ProyectosCreate):
+def create_project(project: ProjectsCreate):
     with Session(engine) as session:
-        db_proyectos = Proyectos.from_orm(proyecto)
-        session.add(db_proyectos)
+        db_projects = Projects.from_orm(project)
+        session.add(db_projects)
         session.commit()
-        session.refresh(db_proyectos)
-        return db_proyectos
+        session.refresh(db_projects)
+        return db_projects
 
 
-@routerProyectos.delete(
-    "/delete_proyecto/{id}", status_code=status.HTTP_200_OK, response_model=Proyectos
+@routerProjects.delete(
+    "/delete_project/{id}", status_code=status.HTTP_200_OK, response_model=Projects
 )
-def delete_proyecto(id: int):
+def delete_project(id: int):
     with Session(engine) as session:
-        proyecto = session.get(Proyectos, id)
-        if not proyecto:
+        project = session.get(Projects, id)
+        if not project:
             raise HTTPException(status_code=404, detail="No se encontro proyecto")
-        session.delete(proyecto)
+        session.delete(project)
         session.commit()
-        return proyecto
+        return project
 
 
-@routerProyectos.patch("/patch_proyecto/{id}", response_model=ProyectosRead)
-def update_proyecto(id: int, proyecto: ProyectosUpdate):
+@routerProjects.patch("/update_project/{id}", response_model=ProjectsRead)
+def update_project(id: int, project: ProjectsUpdate):
     with Session(engine) as session:
-        db_proyectos = session.get(Proyectos, id)
-        if not db_proyectos:
+        db_projects = session.get(Projects, id)
+        if not db_projects:
             raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
-        proyecto_data = proyecto.dict(exclude_unset=True)
-        for key, value in proyecto_data.items():
-            setattr(db_proyectos, key, value)
-        session.add(db_proyectos)
+        project_data = project.dict(exclude_unset=True)
+        for key, value in project_data.items():
+            setattr(db_projects, key, value)
+        session.add(db_projects)
         session.commit()
-        session.refresh(db_proyectos)
-        return db_proyectos
+        session.refresh(db_projects)
+        return db_projects

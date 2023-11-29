@@ -1,86 +1,100 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
-from models.proyectos import Proyectos
-from models.tareas import Tareas, TareasUpdate, TareasRead, TareasCreate
+from models.proyectos import Projects
+from models.tareas import Tasks, TasksUpdate, TasksRead, TasksCreate
 from config.database import engine
 
-routerTareas = APIRouter(
-    prefix="/tareas",
-    tags=["Tareas"],
+routerTasks = APIRouter(
+    prefix="/tasks",
+    tags=["Tasks"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@routerTareas.get(
-    "/get_tareas", status_code=status.HTTP_200_OK, response_model=List[TareasRead]
+@routerTasks.get(
+    "/get_tasks", status_code=status.HTTP_200_OK, response_model=List[TasksRead]
 )
-def get_tareas():
+def get_tasks():
     with Session(engine) as session:
-        tareas = session.exec(select(Tareas)).all()
-        return tareas
+        tasks = session.exec(select(Tasks)).all()
+        return tasks
 
 
-@routerTareas.get(
-    "/get_tareas/{id}",
+@routerTasks.get(
+    "/get_task/{id}",
     status_code=status.HTTP_200_OK,
-    response_model=Tareas,
+    response_model=Tasks,
 )
-def get_tarea_por_id(id: int):
+def get_task_by_id(id: int):
     with Session(engine) as session:
-        tarea = session.get(Tareas, id)
-        if not tarea:
+        task = session.get(Tasks, id)
+        if not task:
             raise HTTPException(status_code=404, detail="No se encontro tarea")
 
-        return tarea
+        return task
 
 
-@routerTareas.post(
-    "/create_tarea",
-    status_code=status.HTTP_201_CREATED,
-    response_model=TareasRead,
+@routerTasks.get(
+    "/get_tasks_by_project_id/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=List[TasksRead],
 )
-def create_tarea(tarea: TareasCreate):
+def get_tasks_by_project_id(proyect_id: int):
+    with Session(engine) as session:
+        tasks = session.exec(select(Tasks).where(Tasks.id_project == proyect_id)).all()
+        # if not tasks:
+        #     raise HTTPException(status_code=404, detail="No se encontraron tareas")
+
+        return tasks
+
+
+@routerTasks.post(
+    "/create_task",
+    status_code=status.HTTP_201_CREATED,
+    response_model=TasksRead,
+)
+def create_task(task: TasksCreate):
     with Session(engine) as session:
         # Validacion fk
-        if tarea.id_proyecto != None and not session.get(Proyectos, tarea.id_proyecto):
+        if task.id_project != None and not session.get(Projects, task.id_project):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
-        db_tareas = Tareas.from_orm(tarea)
-        session.add(db_tareas)
+        db_tasks = Tasks.from_orm(task)
+        session.add(db_tasks)
         session.commit()
-        session.refresh(db_tareas)
-        return db_tareas
+        session.refresh(db_tasks)
+        return db_tasks
 
 
-@routerTareas.delete(
-    "/delete_tarea/{id}", status_code=status.HTTP_200_OK, response_model=Tareas
+@routerTasks.delete(
+    "/delete_task/{id}", status_code=status.HTTP_200_OK, response_model=Tasks
 )
-def delete_tarea(id: int):
+def delete_task(id: int):
     with Session(engine) as session:
-        tarea = session.get(Tareas, id)
-        if not tarea:
+        task = session.get(Tasks, id)
+        if not task:
             raise HTTPException(status_code=404, detail="No se encontro tarea")
-        session.delete(tarea)
+        session.delete(task)
         session.commit()
-        return tarea
+        return task
 
 
-@routerTareas.patch("/patch_tarea/{id}", response_model=TareasRead)
-def update_tarea(id: int, tarea: TareasUpdate):
+@routerTasks.patch("/update_task/{id}", response_model=TasksRead)
+def update_task(id: int, task: TasksUpdate):
     with Session(engine) as session:
-        db_tareas = session.get(Tareas, id)
-        if not db_tareas:
+        db_tasks = session.get(Tasks, id)
+        if not db_tasks:
             raise HTTPException(status_code=404, detail="Tarea no encontrada")
 
         # Validacion fk
-        if tarea.id_proyecto != None and not session.get(Proyectos, tarea.id_proyecto):
+        if task.id_project != None and not session.get(Projects, task.id_project):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
-        tarea_data = tarea.dict(exclude_unset=True)
-        for key, value in tarea_data.items():
-            setattr(db_tareas, key, value)
-        session.add(db_tareas)
+        task_data = task.dict(exclude_unset=True)
+        for key, value in task_data.items():
+            setattr(db_tasks, key, value)
+        session.add(db_tasks)
         session.commit()
-        session.refresh(db_tareas)
-        return db_tareas
+        session.refresh(db_tasks)
+        return db_tasks
