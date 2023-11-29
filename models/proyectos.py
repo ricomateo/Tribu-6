@@ -28,3 +28,4 @@ class ProjectsUpdate(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
     state: Optional[str] = None
+    id_proyect_leader: Optional[int] = None

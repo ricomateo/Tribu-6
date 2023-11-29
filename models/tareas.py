@@ -29,5 +29,4 @@ class TasksUpdate(SQLModel):
     name: Optional[str] = None
     state: Optional[str] = None
     description: Optional[str] = None
-    creation_date: Optional[date] = None
     id_project: Optional[int] = None
