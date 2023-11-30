@@ -7,9 +7,10 @@ from sqlmodel import Field, SQLModel
 class TasksBase(SQLModel):
     name: str
     state: str  # Posibles estados: Iniciada, no iniciada, finalizada
+    priority: str
     description: str
     project_id: Optional[int] = Field(default=None, foreign_key="projects.id")
-    # Responsable
+    responsible_id: Optional[int]
 
 
 class Tasks(TasksBase, table=True):
@@ -32,5 +33,7 @@ class TasksUpdate(SQLModel):
     name: Optional[str] = None
     state: Optional[str] = None
     description: Optional[str] = None
-    project_id: Optional[int] = None
+    priority: Optional[str] = None
     end_date: Optional[date] = None
+    responsible_id: Optional[int] = None
+    project_id: Optional[int] = None
