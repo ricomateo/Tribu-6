@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
 from models.proyectos import Projects
+from models.empleados import Employees
 from models.tareas import Tasks, TasksUpdate, TasksRead, TasksCreate
 from config.database import engine
 
@@ -60,6 +61,13 @@ def create_task(task: TasksCreate):
         if task.project_id != None and not session.get(Projects, task.project_id):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
 
+        if task.responsible_id != None and not session.get(
+            Employees, task.responsible_id
+        ):
+            raise HTTPException(
+                status_code=404, detail="No hay empleado con ese legajo"
+            )
+
         db_tasks = Tasks.from_orm(task)
         session.add(db_tasks)
         session.commit()
@@ -90,6 +98,13 @@ def update_task(id: int, task: TasksUpdate):
         # Validacion fk
         if task.project_id != None and not session.get(Projects, task.project_id):
             raise HTTPException(status_code=404, detail="No hay proyecto con ese id")
+
+        if task.responsible_id != None and not session.get(
+            Employees, task.responsible_id
+        ):
+            raise HTTPException(
+                status_code=404, detail="No hay empleado con ese legajo"
+            )
 
         task_data = task.dict(exclude_unset=True)
         for key, value in task_data.items():

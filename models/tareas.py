@@ -10,13 +10,13 @@ class TasksBase(SQLModel):
     priority: str
     description: str
     project_id: Optional[int] = Field(default=None, foreign_key="projects.id")
-    responsible_id: Optional[int]
+    responsible_id: Optional[int] = Field(default=None, foreign_key="employees.legajo")
+    end_date: Optional[date] = None
 
 
 class Tasks(TasksBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     creation_date: date = date.today()
-    end_date: Optional[date] = Field(default=None, nullable=True)
 
 
 class TasksCreate(TasksBase):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
+from models.empleados import Employees
 from models.proyectos import Projects, ProjectsUpdate, ProjectsRead, ProjectsCreate
 from config.database import engine
 
@@ -41,6 +42,14 @@ def get_project_by_id(id: int):
 )
 def create_project(project: ProjectsCreate):
     with Session(engine) as session:
+        # Validacion fk
+        if project.project_leader_id != None and not session.get(
+            Employees, project.project_leader_id
+        ):
+            raise HTTPException(
+                status_code=404, detail="No hay empleado con ese legajo"
+            )
+
         db_projects = Projects.from_orm(project)
         session.add(db_projects)
         session.commit()
@@ -67,6 +76,14 @@ def update_project(id: int, project: ProjectsUpdate):
         db_projects = session.get(Projects, id)
         if not db_projects:
             raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+        # Validacion fk
+        if project.project_leader_id != None and not session.get(
+            Employees, project.project_leader_id
+        ):
+            raise HTTPException(
+                status_code=404, detail="No hay empleado con ese legajo"
+            )
 
         project_data = project.dict(exclude_unset=True)
         for key, value in project_data.items():

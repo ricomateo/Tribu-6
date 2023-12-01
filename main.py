@@ -4,6 +4,7 @@ from config.database import create_db_and_tables
 
 from routers.proyectos import routerProjects
 from routers.tareas import routerTasks
+from routers.empleados import routerEmployees, create_employees_from_API
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -13,6 +14,7 @@ create_db_and_tables()
 
 app.include_router(routerProjects)
 app.include_router(routerTasks)
+app.include_router(routerEmployees)
 
 
 @app.get("/")
@@ -31,4 +33,6 @@ app.add_middleware(
 
 
 if __name__ == "__main__":
+    create_employees_from_API()
+
     uvicorn.run("main:app", reload=False)
