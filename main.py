@@ -35,4 +35,4 @@ app.add_middleware(
 if __name__ == "__main__":
     create_employees_from_API()
 
-    uvicorn.run("main:app", reload=False)
+    uvicorn.run("main:app", reload=True)

@@ -5,7 +5,7 @@ from sqlmodel import Field, SQLModel
 
 
 class ProjectsBase(SQLModel):
-    name: str
+    name: str = Field(unique=True)
     state: str
     description: str
     expected_duration_days: int

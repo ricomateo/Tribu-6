@@ -5,7 +5,7 @@ from sqlmodel import Field, SQLModel
 
 
 class TasksBase(SQLModel):
-    name: str
+    name: str = Field(unique=True)
     state: str  # Posibles estados: Iniciada, no iniciada, finalizada
     priority: str
     description: str
