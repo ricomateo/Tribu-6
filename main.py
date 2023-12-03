@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from config.database import create_db_and_tables
+from config.database import create_db_and_tables, engine
 
 from routers.proyectos import routerProjects
 from routers.tareas import routerTasks

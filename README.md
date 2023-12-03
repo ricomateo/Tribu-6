@@ -6,6 +6,10 @@ Backend squad 12
 
 ```bash
 (windows): tribu6-env/Scripts/Activate.ps1
+```
 
-(linux): source ./tribu6-env/bin/activate
+## Correr tests
+
+```bash
+pytest -W ignore::DeprecationWarning
 ```

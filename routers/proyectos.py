@@ -1,9 +1,9 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from sqlmodel import Session, select
 from models.empleados import Employees
 from models.proyectos import Projects, ProjectsUpdate, ProjectsRead, ProjectsCreate
-from config.database import engine
+from config.database import get_session
 
 routerProjects = APIRouter(
     prefix="/projects",
@@ -15,10 +15,9 @@ routerProjects = APIRouter(
 @routerProjects.get(
     "/get_projects", status_code=status.HTTP_200_OK, response_model=List[ProjectsRead]
 )
-def get_projects():
-    with Session(engine) as session:
-        projects = session.exec(select(Projects)).all()
-        return projects
+def get_projects(*, session: Session = Depends(get_session)):
+    projects = session.exec(select(Projects)).all()
+    return projects
 
 
 @routerProjects.get(
@@ -26,13 +25,12 @@ def get_projects():
     status_code=status.HTTP_200_OK,
     response_model=Projects,
 )
-def get_project_by_id(id: int):
-    with Session(engine) as session:
-        project = session.get(Projects, id)
-        if not project:
-            raise HTTPException(status_code=404, detail="No se encontro proyecto")
+def get_project_by_id(*, session: Session = Depends(get_session), id: int):
+    project = session.get(Projects, id)
+    if not project:
+        raise HTTPException(status_code=404, detail="No se encontro proyecto")
 
-        return project
+    return project
 
 
 @routerProjects.post(
@@ -40,55 +38,50 @@ def get_project_by_id(id: int):
     status_code=status.HTTP_201_CREATED,
     response_model=ProjectsRead,
 )
-def create_project(project: ProjectsCreate):
-    with Session(engine) as session:
-        # Validacion fk
-        if project.project_leader_id != None and not session.get(
-            Employees, project.project_leader_id
-        ):
-            raise HTTPException(
-                status_code=404, detail="No hay empleado con ese legajo"
-            )
+def create_project(*, session: Session = Depends(get_session), project: ProjectsCreate):
+    # Validacion fk
+    if project.project_leader_id != None and not session.get(
+        Employees, project.project_leader_id
+    ):
+        raise HTTPException(status_code=404, detail="No hay empleado con ese legajo")
 
-        db_projects = Projects.from_orm(project)
-        session.add(db_projects)
-        session.commit()
-        session.refresh(db_projects)
-        return db_projects
+    db_projects = Projects.from_orm(project)
+    session.add(db_projects)
+    session.commit()
+    session.refresh(db_projects)
+    return db_projects
 
 
 @routerProjects.delete(
     "/delete_project/{id}", status_code=status.HTTP_200_OK, response_model=Projects
 )
-def delete_project(id: int):
-    with Session(engine) as session:
-        project = session.get(Projects, id)
-        if not project:
-            raise HTTPException(status_code=404, detail="No se encontro proyecto")
-        session.delete(project)
-        session.commit()
-        return project
+def delete_project(*, session: Session = Depends(get_session), id: int):
+    project = session.get(Projects, id)
+    if not project:
+        raise HTTPException(status_code=404, detail="No se encontro proyecto")
+    session.delete(project)
+    session.commit()
+    return project
 
 
 @routerProjects.patch("/update_project/{id}", response_model=ProjectsRead)
-def update_project(id: int, project: ProjectsUpdate):
-    with Session(engine) as session:
-        db_projects = session.get(Projects, id)
-        if not db_projects:
-            raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+def update_project(
+    *, session: Session = Depends(get_session), id: int, project: ProjectsUpdate
+):
+    db_projects = session.get(Projects, id)
+    if not db_projects:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
 
-        # Validacion fk
-        if project.project_leader_id != None and not session.get(
-            Employees, project.project_leader_id
-        ):
-            raise HTTPException(
-                status_code=404, detail="No hay empleado con ese legajo"
-            )
+    # Validacion fk
+    if project.project_leader_id != None and not session.get(
+        Employees, project.project_leader_id
+    ):
+        raise HTTPException(status_code=404, detail="No hay empleado con ese legajo")
 
-        project_data = project.dict(exclude_unset=True)
-        for key, value in project_data.items():
-            setattr(db_projects, key, value)
-        session.add(db_projects)
-        session.commit()
-        session.refresh(db_projects)
-        return db_projects
+    project_data = project.dict(exclude_unset=True)
+    for key, value in project_data.items():
+        setattr(db_projects, key, value)
+    session.add(db_projects)
+    session.commit()
+    session.refresh(db_projects)
+    return db_projects
