@@ -6,8 +6,8 @@ from datetime import date
 ENDPOINT = "/projects"
 
 
-@scenario("proyecto_read.feature", "There are projects")
-def test_consult_present_projects():
+@scenario("proyecto_delete.feature", "The project is successfully deleted")
+def test_delete_present_project():
     pass
 
 
@@ -42,18 +42,33 @@ def created_projects(client: TestClient):
     assert data2["id"] == 2
 
 
-@when("the user chooses to consult the projects", target_fixture="response")
-def send_get_projects(client: TestClient):
-    return client.get(ENDPOINT + "/get_projects")
+@when("the user chooses to delete a project", target_fixture="response")
+def send_delete_project(client: TestClient):
+    return client.delete(ENDPOINT + "/delete_project/2")
 
 
-@then("you are shown a list of all the projects")
-def validate_get_succsessful(response):
+@when("confirm the deletion of the project")
+def confirm_delete_project(response):
     data = response.json()
+
+    assert data["name"] == "Update molinete"
+    assert data["state"] == "No iniciado"
+    assert data["description"] == "Agregar nuevas funcionalidades"
+    assert data["expected_duration_days"] == 100
+    assert data["project_leader_id"] == 2
+    assert data["id"] == 2
+    assert data["creation_date"] == date.today().strftime("%Y-%m-%d")
+    assert data["end_date"] is None
+
+
+@then("the project is deleted and is no longer shown in the project list")
+def validate_project_deletion(client: TestClient):
+    response_get = client.get(ENDPOINT + "/get_projects")
+
+    data = response_get.json()
     print(data)
 
-    # Primer proyecto
-    assert response.status_code == 200
+    assert response_get.status_code == 200
     assert data[0]["name"] == "Fix molinete"
     assert data[0]["state"] == "Iniciado"
     assert (
@@ -65,37 +80,3 @@ def validate_get_succsessful(response):
     assert data[0]["id"] == 1
     assert data[0]["creation_date"] == date.today().strftime("%Y-%m-%d")
     assert data[0]["end_date"] is None
-
-    # Segundo proyecto
-    assert data[1]["name"] == "Update molinete"
-    assert data[1]["state"] == "No iniciado"
-    assert data[1]["description"] == "Agregar nuevas funcionalidades"
-    assert data[1]["expected_duration_days"] == 100
-    assert data[1]["project_leader_id"] == 2
-    assert data[1]["id"] == 2
-    assert data[1]["creation_date"] == date.today().strftime("%Y-%m-%d")
-    assert data[1]["end_date"] is None
-
-
-# -------------------------------------------------------------------------------------------------------------------#
-
-
-@scenario("proyecto_read.feature", "No projects created")
-def test_consult_no_projects():
-    pass
-
-
-@given("there are no projects created")
-def no_created_projects():
-    # ¯\_(ツ)_/¯
-    pass
-
-
-@then("you are informed that there are no projects yet")
-def validate_get_no_projects(response):
-    data = response.json()
-    print(data)
-
-    # Primer proyecto
-    assert response.status_code == 200
-    assert data == []
